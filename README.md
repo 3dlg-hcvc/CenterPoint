@@ -1,3 +1,31 @@
+# ENV Install by Shawn
+```
+conda create --name centerpoint python=3.7
+conda activate centerpoint
+conda install pytorch==1.10.1 torchvision==0.11.2 torchaudio==0.10.1 cudatoolkit=11.3 -c pytorch -c conda-forge
+cd CenterPoint
+pip install -r requirements.txt
+export PYTHONPATH="${PYTHONPATH}:/local-scratch/localhome/hja40/Desktop/Research/proj-objtrack/CenterPoint"
+cd ..
+git clone https://github.com/tianweiy/nuscenes-devkit
+export PYTHONPATH="${PYTHONPATH}:/local-scratch/localhome/hja40/Desktop/Research/proj-objtrack/nuscenes-devkit/python-sdk"
+export PATH=/usr/local/cuda-11.3/bin:$PATH
+export CUDA_PATH=/usr/local/cuda-11.3
+export CUDA_HOME=/usr/local/cuda-11.3
+export LD_LIBRARY_PATH=/usr/local/cuda-11.3/lib64:$LD_LIBRARY_PATH
+cd CenterPoint/det3d/ops/iou3d_nms
+python setup.py build_ext --inplace
+cd ../dcn 
+# Need to change AT_CHECK to TORCH_CHECK
+python setup.py build_ext --inplace
+cd ../../../..
+git clone https://github.com/NVIDIA/apex
+cd apex
+git checkout 5633f6
+pip install -v --no-cache-dir --global-option="--cpp_ext" --global-option="--cuda_ext" ./
+pip install spconv-cu113
+```
+
 # Center-based 3D Object Detection and Tracking
 
 3D Object Detection and Tracking using center points in the bird-eye view.
