@@ -26,6 +26,16 @@ pip install -v --no-cache-dir --global-option="--cpp_ext" --global-option="--cud
 pip install spconv-cu113
 ```
 
+# Run experiments on the mini-version of NuScenes
+## Prepare the data
+```
+python tools/create_data.py nuscenes_data_prep --root_path=/local-scratch/localhome/hja40/Desktop/Research/proj-objtrack/CenterPoint/data/nuScenes --version="v1.0-mini" --nsweeps=10
+```
+# Train the data
+```
+python tools/train.py /local-scratch/localhome/hja40/Desktop/Research/proj-objtrack/CenterPoint/configs/nusc/voxelnet/nusc_centerpoint_voxelnet_0075voxel_fix_bn_z.py
+```
+
 # Center-based 3D Object Detection and Tracking
 
 3D Object Detection and Tracking using center points in the bird-eye view.
