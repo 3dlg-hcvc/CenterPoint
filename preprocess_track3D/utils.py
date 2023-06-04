@@ -4,6 +4,79 @@ import numpy as np
 import torch
 from torch.nn import functional as F
 
+# Borrow ideas and codes from H. Sánchez's answer
+# https://stackoverflow.com/questions/59026581/create-arrows-in-open3d
+def getArrowMesh(origin=[0, 0, 0], end=None, color=[0, 0, 0]):
+    vec_Arr = np.array(end) - np.array(origin)
+    vec_len = np.linalg.norm(vec_Arr)
+    mesh_arrow = o3d.geometry.TriangleMesh.create_arrow(
+        cone_height=0.2 * vec_len,
+        cone_radius=0.08,
+        cylinder_height=1.0 * vec_len,
+        cylinder_radius=0.04,
+    )
+    mesh_arrow.paint_uniform_color(color)
+    rot_mat = _caculate_align_mat(vec_Arr / vec_len)
+    mesh_arrow.rotate(rot_mat, center=np.array([0, 0, 0]))
+    mesh_arrow.translate(np.array(origin))
+    return mesh_arrow
+
+
+def _get_cross_prod_mat(pVec_Arr):
+    # pVec_Arr shape (3)
+    qCross_prod_mat = np.array(
+        [
+            [0, -pVec_Arr[2], pVec_Arr[1]],
+            [pVec_Arr[2], 0, -pVec_Arr[0]],
+            [-pVec_Arr[1], pVec_Arr[0], 0],
+        ]
+    )
+    return qCross_prod_mat
+
+
+def _caculate_align_mat(pVec_Arr):
+    scale = np.linalg.norm(pVec_Arr)
+    pVec_Arr = pVec_Arr / scale
+    # must ensure pVec_Arr is also a unit vec.
+    z_unit_Arr = np.array([0, 0, 1])
+    z_mat = _get_cross_prod_mat(z_unit_Arr)
+
+    z_c_vec = np.matmul(z_mat, pVec_Arr)
+    z_c_vec_mat = _get_cross_prod_mat(z_c_vec)
+    if np.dot(z_unit_Arr, pVec_Arr) == -1:
+        qTrans_Mat = -np.eye(3, 3)
+    elif np.dot(z_unit_Arr, pVec_Arr) == 1:
+        qTrans_Mat = np.eye(3, 3)
+    else:
+        qTrans_Mat = (
+            np.eye(3, 3)
+            + z_c_vec_mat
+            + np.matmul(z_c_vec_mat, z_c_vec_mat) / (1 + np.dot(z_unit_Arr, pVec_Arr))
+        )
+    qTrans_Mat *= scale
+    return qTrans_Mat
+
+
+# The obb visualization function from https://github.com/3dlg-hcvc/egoexo/blob/main/scripts/visualize_sequence.py
+def get_obb_pose(obb):
+    front = np.asarray(obb['front'])
+    front = front / np.linalg.norm(front)
+    up = np.asarray(obb['up'])
+    up = up / np.linalg.norm(up)
+    right = np.cross(up, front)
+    orientation = np.eye(4)
+    orientation[:3, :3] = np.stack([right, up, front], axis=0)
+    translation = np.eye(4)
+    translation[:3, 3] = -np.asarray(obb['centroid'])
+    return np.dot(orientation, translation)
+
+def get_o3d_obb_mesh(obb):
+    obb_pose = get_obb_pose(obb)
+    return o3d.geometry.OrientedBoundingBox(obb['centroid'], 
+                                            obb_pose[:3, :3].T, 
+                                            obb['axesLengths'])
+
+# The camera visualization function from https://github.com/Jianghanxiao/Helper3D/blob/master/open3d_RGBD/src/camera/cameraHelper.py
 # Currently this doesn't consider different fx and fy
 def getCamera(
     transformation,
@@ -61,7 +134,7 @@ def getCamera(
 
     return meshes
 
-
+# The transformation code from pyTorch3D
 def _sqrt_positive_part(x: torch.Tensor) -> torch.Tensor:
     """
     Returns torch.sqrt(torch.max(0, x))
