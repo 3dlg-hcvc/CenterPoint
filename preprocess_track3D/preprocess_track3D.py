@@ -51,6 +51,7 @@ def get_parser():
 
 
 def processClip(clip_path, output_path, clip_index):
+    print(f"Processing clip {clip_index}... {clip_path}")
     existDir(f"{output_path}/{clip_index}")
 
     camera_base_path = f"{clip_path}/camera"
