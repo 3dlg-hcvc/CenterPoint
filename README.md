@@ -26,6 +26,17 @@ pip install -v --no-cache-dir --global-option="--cpp_ext" --global-option="--cud
 pip install spconv-cu113
 ```
 
+# Preprocess the track3D data
+## Install the EgoExo following the instruction in eogexo
+Create a new environment to save the time, because the python version has some conflict
+```
+conda create -n egoexo python=3.9
+conda activate egoexo
+git clone git@github.com:3dlg-hcvc/egoexo.git
+cd egoexo
+pip install -e .
+```
+
 # Run experiments on the mini-version of NuScenes
 ## Prepare the data
 ```
