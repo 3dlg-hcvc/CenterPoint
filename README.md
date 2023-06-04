@@ -35,6 +35,7 @@ conda activate egoexo
 git clone git@github.com:3dlg-hcvc/egoexo.git
 cd egoexo
 pip install -e .
+pip install natsort
 ```
 
 # Run experiments on the mini-version of NuScenes
