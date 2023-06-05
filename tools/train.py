@@ -138,7 +138,7 @@ def main():
         logger.info("Set random seed to {}".format(args.seed))
         set_random_seed(args.seed)
 
-    model = build_detector(cfg.model, train_cfg=cfg.train_cfg, test_cfg=cfg.test_cfg)
+    model = build_detector(cfg.model, train_cfg=cfg.train_cfg, test_cfg=None)
 
     datasets = [build_dataset(cfg.data.train)]
 
