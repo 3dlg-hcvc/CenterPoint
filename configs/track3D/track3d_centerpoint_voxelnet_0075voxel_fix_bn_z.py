@@ -54,7 +54,7 @@ assigner = dict(
     out_size_factor=get_downsample_factor(model),
     dense_reg=1,
     gaussian_overlap=0.1,
-    max_objs=500,
+    max_objs=1,
     min_radius=2,
 )
 
@@ -96,10 +96,9 @@ voxel_generator = dict(
 
 # TODO: Update the train pipeline to get our data
 train_pipeline = [
-    dict(type="Voxelization", cfg=voxel_generator),
-    dict(type="AssignLabel", cfg=train_cfg["assigner"]),
-    dict(type="Reformat"),
-    # dict(type='PointCloudCollect', keys=['points', 'voxels', 'annotations', 'calib']),
+    dict(type="Track3DVoxelization", cfg=voxel_generator),
+    dict(type="Track3DAssignLabel", cfg=train_cfg["assigner"]),
+    dict(type="Track3DReformat"),
 ]
 # test_pipeline = [
 #     dict(type="LoadPointCloudFromFile", dataset=dataset_type),
@@ -119,6 +118,7 @@ data = dict(
         class_names=class_names,
         pipeline=train_pipeline,
         shuffle_points=True,
+        mode="train"
     ),
     # val=dict(
     #     type=dataset_type,
@@ -127,6 +127,7 @@ data = dict(
     #     class_names=class_names,
     #     pipeline=test_pipeline,
     #     shuffle_points=False,
+    #     mode="val"
     # ),
     # test=dict(
     #     type=dataset_type,

@@ -87,4 +87,34 @@ class Reformat(object):
         return data_bundle, info
 
 
+@PIPELINES.register_module
+class Track3DReformat(object):
+    def __init__(self, **kwargs):
+        pass
+
+    def __call__(self, res, info):
+        points = res["points"]
+        
+        data_bundle = dict(
+        )
+        if points is not None:
+            data_bundle.update(points=points)
+
+        if 'voxels' in res:
+            voxels = res["voxels"] 
+
+            data_bundle.update(
+                voxels=voxels["voxels"],
+                shape=voxels["shape"],
+                num_points=voxels["num_points"],
+                num_voxels=voxels["num_voxels"],
+                coordinates=voxels["coordinates"],
+            )
+
+        data_bundle.update(res["targets"])
+
+        return data_bundle, info
+
+
+
 

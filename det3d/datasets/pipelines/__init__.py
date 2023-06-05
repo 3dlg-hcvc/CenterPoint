@@ -1,10 +1,10 @@
 from .compose import Compose
-from .formating import Reformat
+from .formating import Reformat, Track3DReformat
 
 # from .loading import LoadAnnotations, LoadImageFromFile, LoadProposals
 from .loading import *
 from .test_aug import DoubleFlip
-from .preprocess import Preprocess, Voxelization
+from .preprocess import Preprocess, Voxelization, Track3DVoxelization
 
 __all__ = [
     "Compose",
@@ -21,5 +21,8 @@ __all__ = [
     "Preprocess",
     "Voxelization",
     "AssignTarget",
-    "AssignLabel"
+    "AssignLabel",
+    "Track3DVoxelization",
+    "Track3DAssignLabel",
+    "Track3DReformat",
 ]

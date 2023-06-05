@@ -41,10 +41,12 @@ class Track3DDataset(PointCloudDataset):
         test_mode=False,
         load_interval=1,
         shuffle_points=False,
+        mode=None,
         **kwargs,
     ):
         self.load_interval = load_interval
         self.shuffle_points = shuffle_points
+        self.mode = mode
         # Get the point cloud path and the box info path
         self.pc_paths = glob.glob(f"{root_path}/*/pcd/*.npy")
         self.box_paths = glob.glob(f"{root_path}/*/box_info.json")
@@ -66,32 +68,6 @@ class Track3DDataset(PointCloudDataset):
     def __len__(self):
         return len(self.pc_paths)
 
-    def get_sensor_data(self, idx):
-        info = self._nusc_infos[idx]
-
-        res = {
-            "lidar": {
-                "type": "lidar",
-                "points": None,
-                "nsweeps": self.nsweeps,
-                # "ground_plane": -gp[-1] if with_gp else None,
-                "annotations": None,
-            },
-            "metadata": {
-                "image_prefix": self._root_path,
-                "num_point_features": self._num_point_features,
-                "token": info["token"],
-            },
-            "calib": None,
-            "cam": {},
-            "mode": "val" if self.test_mode else "train",
-            "virtual": self.virtual,
-        }
-
-        data, _ = self.pipeline(res, info)
-
-        return data
-
     def __getitem__(self, idx):
         # pcd feature, x, y, z, r, g, b (rgb in 0-1)
         pc_path = self.pc_paths[idx]
@@ -105,6 +81,7 @@ class Track3DDataset(PointCloudDataset):
             ]
         )
         res = {
+            "mode": self.mode,
             "points": points,
             "annotations": box_info,
         }
