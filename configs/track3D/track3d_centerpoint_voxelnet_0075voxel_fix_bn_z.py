@@ -88,8 +88,8 @@ val_preprocessor = dict(
 
 # Keep the voxel number 1440 * 1440 * 40
 voxel_generator = dict(
-    range=[-7.2, -7.2, -1.0, 7.2, 7.2, 3.0],
-    voxel_size=[0.01, 0.01, 0.1],
+    range=[-9.0, -3.0, -5.0, 9.0, 15.0, 11.0],
+    voxel_size=[0.0125, 0.0125, 0.4],
     max_points_in_voxel=10,
     max_voxel_num=[120000, 160000],
 )
