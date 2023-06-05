@@ -4,10 +4,8 @@ import re
 from collections import OrderedDict, defaultdict
 from functools import partial
 
-try:
-    import apex
-except:
-    print("No APEX!")
+import apex
+
 
 import numpy as np
 import torch
