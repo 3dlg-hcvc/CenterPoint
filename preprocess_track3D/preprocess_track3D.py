@@ -145,8 +145,8 @@ def processClip(clip_path, output_path, clip_index):
     for i in range(len(pcds)):
         # Transform the point cloud into the mean camera coordinate
         new_pcd_data = pcds[i].pcd.transform(mean_extrinsic)
-        points = np.asarray(new_pcd_data.points)
-        colors = np.asarray(new_pcd_data.colors)
+        points = np.asarray(new_pcd_data.points, dtype=np.float32)
+        colors = np.asarray(new_pcd_data.colors, dtype=np.float32)
         points_colors = np.concatenate([points, colors], axis=1)
 
         # Transform the obb into the camera coordinate system (the transform function is not implemented for OBB in open3d)
