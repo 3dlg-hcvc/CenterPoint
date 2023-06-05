@@ -71,7 +71,7 @@ class Track3DDataset(PointCloudDataset):
     def __getitem__(self, idx):
         # pcd feature, x, y, z, r, g, b (rgb in 0-1)
         pc_path = self.pc_paths[idx]
-        points = np.load(pc_path)
+        points = np.load(pc_path).astype(np.float32)
         if self.shuffle_points:
             np.random.shuffle(points)
         # Box information has been in cx, cy, cz, dx, dy, dz, vx, vy, yaw
@@ -79,7 +79,7 @@ class Track3DDataset(PointCloudDataset):
             self.box_infos[os.path.dirname(os.path.dirname(pc_path))][
                 os.path.basename(pc_path).split(".")[0]
             ]
-        )
+        ).astype(np.float32)
         res = {
             "mode": self.mode,
             "points": points,
