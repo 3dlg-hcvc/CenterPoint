@@ -111,7 +111,7 @@ train_pipeline = [
 
 data = dict(
     samples_per_gpu=4,
-    workers_per_gpu=4,
+    workers_per_gpu=6,
     train=dict(
         type=dataset_type,
         root_path=f"{data_root}/train",

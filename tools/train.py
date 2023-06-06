@@ -79,6 +79,7 @@ def main():
 
     distributed = False
     if "WORLD_SIZE" in os.environ:
+        print("WORLD_SIZE: ", os.environ["WORLD_SIZE"])
         distributed = int(os.environ["WORLD_SIZE"]) > 1
 
     if distributed:
