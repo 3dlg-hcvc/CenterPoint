@@ -86,6 +86,7 @@ class Track3DDataset(PointCloudDataset):
             "annotations": box_info,
         }
         data, _ = self.pipeline(res, None)
+        data["path"] = pc_path
         return data
 
     def evaluation(self, detections, output_dir=None, testset=False):

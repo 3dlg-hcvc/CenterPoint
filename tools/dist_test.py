@@ -28,6 +28,7 @@ from det3d.torchie.trainer.utils import all_gather, synchronize
 from torch.nn.parallel import DistributedDataParallel
 import pickle 
 import time 
+import json
 
 def save_pred(pred, root):
     with open(os.path.join(root, "prediction.pkl"), "wb") as f:
@@ -121,6 +122,7 @@ def main():
     )
 
     checkpoint = load_checkpoint(model, args.checkpoint, map_location="cpu")
+    print(f"Finished loading model from {args.checkpoint}")
 
     # put model on gpus
     if distributed:
@@ -154,6 +156,8 @@ def main():
     time_start = 0 
     time_end = 0 
 
+    results = {"path": [], "bbx": [], "score": []}
+
     for i, data_batch in enumerate(data_loader):
         if i == start:
             torch.cuda.synchronize()
@@ -167,45 +171,46 @@ def main():
             outputs = batch_processor(
                 model, data_batch, train_mode=False, local_rank=args.local_rank,
             )
-        for output in outputs:
-            token = output["metadata"]["token"]
-            for k, v in output.items():
-                if k not in [
-                    "metadata",
-                ]:
-                    output[k] = v.to(cpu_device)
-            detections.update(
-                {token: output,}
-            )
-            if args.local_rank == 0:
-                prog_bar.update()
 
+            bbx_index = torch.argmax(outputs[0][0], dim=1)[:, 0]
+        # Process the outputs
+        for j in range(data_batch["path"].shape[0]):
+            path = data_batch["path"][j]
+            bbx_params = outputs[0][1][j][bbx_index[j]].cpu().numpy()
+            results["path"].append(path)
+            results["bbx"].append(bbx_params)
+            results["score"].append(outputs[0][0][j][bbx_index[j]].cpu().numpy()[0])
+            
+            prog_bar.update()
     synchronize()
-
-    all_predictions = all_gather(detections)
 
     print("\n Total time per frame: ", (time_end -  time_start) / (end - start))
 
-    if args.local_rank != 0:
-        return
+    with open(f"{args.work_dir}/results.json", "w") as f:
+        json.dump(results["path"], f)
 
-    predictions = {}
-    for p in all_predictions:
-        predictions.update(p)
+    np.save(f"{args.work_dir}/bbx.npy", np.array(results["bbx"]))
+    np.save(f"{args.work_dir}/score.npy", np.array(results["score"]))
+    # if args.local_rank != 0:
+    #     return
 
-    if not os.path.exists(args.work_dir):
-        os.makedirs(args.work_dir)
+    # predictions = {}
+    # for p in all_predictions:
+    #     predictions.update(p)
 
-    save_pred(predictions, args.work_dir)
+    # if not os.path.exists(args.work_dir):
+    #     os.makedirs(args.work_dir)
 
-    result_dict, _ = dataset.evaluation(copy.deepcopy(predictions), output_dir=args.work_dir, testset=args.testset)
+    # save_pred(predictions, args.work_dir)
 
-    if result_dict is not None:
-        for k, v in result_dict["results"].items():
-            print(f"Evaluation {k}: {v}")
+    # result_dict, _ = dataset.evaluation(copy.deepcopy(predictions), output_dir=args.work_dir, testset=args.testset)
 
-    if args.txt_result:
-        assert False, "No longer support kitti"
+    # if result_dict is not None:
+    #     for k, v in result_dict["results"].items():
+    #         print(f"Evaluation {k}: {v}")
+
+    # if args.txt_result:
+    #     assert False, "No longer support kitti"
 
 if __name__ == "__main__":
     main()
