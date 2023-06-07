@@ -94,12 +94,12 @@ if __name__ == "__main__":
             center = bbx[:3]
             angle = bbx[8]
 
-            if DEBUG:
+            if DEBUG and False:
                 processed_gt_obb = processed_gt_obbs[preds[i][0].split("/")[-1].split(".")[0]]
                 center = processed_gt_obb[:3]
                 angle = processed_gt_obb[8]
 
-            if DEBUG and False:
+            if DEBUG and True:
                 # Get the gt obb
                 processed_gt_obb = processed_gt_obbs[preds[i][0].split("/")[-1].split(".")[0]]
                 processed_gt_center = processed_gt_obb[:3]
@@ -110,7 +110,7 @@ if __name__ == "__main__":
                 pcd.points = o3d.utility.Vector3dVector(points_colors[:, :3])
                 pcd.colors = o3d.utility.Vector3dVector(points_colors[:, 3:])
 
-                processed_gt_obb = o3d.geometry.OrientedBoundingBox(
+                processed_gt_obb_mesh = o3d.geometry.OrientedBoundingBox(
                     center=processed_gt_center,
                     R=np.array(
                         [
@@ -131,10 +131,10 @@ if __name__ == "__main__":
                             [0, 0, 1],
                         ]
                     ),
-                    extent=np.array(bbx[3:6]),
+                    extent=np.array(processed_gt_obb[3:6]),
                 )
 
-                o3d.visualization.draw_geometries([pcd, processed_gt_obb, obb])
+                o3d.visualization.draw_geometries([pcd, processed_gt_obb_mesh, obb])
 
 
             transformation = np.eye(4)
